@@ -1,53 +1,59 @@
-import { createContext, useContext, useState } from 'react'
-import { authApi } from '../services/api'
+import { createContext, useContext, useState } from "react";
 
-const AuthContext = createContext(null)
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem('booked_user')
-    return saved ? JSON.parse(saved) : null
-  })
+    const saved = localStorage.getItem("booked_user");
+    return saved ? JSON.parse(saved) : null;
+  });
 
-  function saveSession(token, user) {
-    localStorage.setItem('booked_token', token)
-    localStorage.setItem('booked_user', JSON.stringify(user))
-    setCurrentUser(user)
+  function getUsers() {
+    const saved = localStorage.getItem("booked_users");
+    return saved ? JSON.parse(saved) : [];
   }
 
-  async function register(username, password) {
-    try {
-      const { token, user } = await authApi.register(username, password)
-      saveSession(token, user)
-      return { success: true }
-    } catch (err) {
-      return { error: err.message }
+  function register(username, password) {
+    const users = getUsers();
+    if (
+      users.find((u) => u.username.toLowerCase() === username.toLowerCase())
+    ) {
+      return { error: "Username already taken." };
     }
+    const newUser = { id: Date.now(), username };
+    localStorage.setItem(
+      "booked_users",
+      JSON.stringify([...users, { ...newUser, password }]),
+    );
+    return { success: true };
   }
 
-  async function login(username, password) {
-    try {
-      const { token, user } = await authApi.login(username, password)
-      saveSession(token, user)
-      return { success: true }
-    } catch (err) {
-      return { error: err.message }
-    }
+  function login(username, password) {
+    const users = getUsers();
+    const match = users.find(
+      (u) =>
+        u.username.toLowerCase() === username.toLowerCase() &&
+        u.password === password,
+    );
+    if (!match) return { error: "Invalid username or password." };
+    const user = { id: match.id, username: match.username };
+    localStorage.setItem("booked_user", JSON.stringify(user));
+    setCurrentUser(user);
+    return { success: true };
   }
 
   function logout() {
-    localStorage.removeItem('booked_token')
-    localStorage.removeItem('booked_user')
-    setCurrentUser(null)
+    localStorage.removeItem("booked_user");
+    setCurrentUser(null);
   }
 
   return (
     <AuthContext.Provider value={{ currentUser, login, register, logout }}>
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
 export function useAuth() {
-  return useContext(AuthContext)
+  return useContext(AuthContext);
 }

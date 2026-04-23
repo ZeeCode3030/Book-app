@@ -1,28 +1,32 @@
-import { useState } from 'react'
-import { useAuth } from '../context/AuthContext'
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Register({ onSwitch }) {
-  const { register } = useAuth()
-  const [form, setForm] = useState({ username: '', password: '', confirm: '' })
-  const [error, setError] = useState('')
+  const { register } = useAuth();
+  const [form, setForm] = useState({ username: "", password: "", confirm: "" });
+  const [error, setError] = useState("");
 
   function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value })
-    setError('')
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setError("");
   }
 
   function handleSubmit(e) {
-    e.preventDefault()
+    e.preventDefault();
     if (form.password.length < 6) {
-      setError('Password must be at least 6 characters.')
-      return
+      setError("Password must be at least 6 characters.");
+      return;
     }
     if (form.password !== form.confirm) {
-      setError('Passwords do not match.')
-      return
+      setError("Passwords do not match.");
+      return;
     }
-    const result = register(form.username.trim(), form.password)
-    if (result.error) setError(result.error)
+    const result = register(form.username.trim(), form.password);
+    if (result.error) {
+      setError(result.error);
+    } else {
+      onSwitch();
+    }
   }
 
   return (
@@ -72,12 +76,12 @@ export default function Register({ onSwitch }) {
         <button type="submit">Register</button>
 
         <p className="auth-switch">
-          Already have an account?{' '}
+          Already have an account?{" "}
           <button type="button" className="link-btn" onClick={onSwitch}>
             Log in
           </button>
         </p>
       </form>
     </div>
-  )
+  );
 }
