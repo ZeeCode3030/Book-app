@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+server/node_modules/
+my-app/node_modules/
+
+# Build output
+my-app/dist/
+
+# Environment files (contain secrets)
+server/.env
+.env
+
+# SQLite database file
+server/booked.db
+
+# OS files
+.DS_Store
+Thumbs.db
